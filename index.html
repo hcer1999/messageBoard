@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>小小留言板</title>
+    <link rel="stylesheet" href="./css/layui.css">
+    <style>
+        body {
+            background: url("./images/bj.png");
+        }
+
+        fieldset {
+            background-color: #fff;
+        }
+
+        .layui-timeline {
+            margin: 20px;
+        }
+
+        h3 span {
+            float: right;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <!--导航条strat-->
+    <ul class="layui-nav layui-bg-blue">
+        <li class="layui-nav-item">
+            <a href="">小小留言板</a>
+        </li>
+    </ul>
+    <!--导航条end-->
+    <!--表单strat-->
+    <div class="layui-row">
+        <div class="layui-col-xs10 layui-col-xs-offset1 layui-col-md6 layui-col-md-offset3">
+            <fieldset class="layui-elem-field">
+                <legend>留言板</legend>
+                <div class="layui-field-box">
+                    <form class="layui-form" action="./save.php" method="post">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">用户名：</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="username" required lay-verify="required" placeholder="请输入你的用户名"
+                                    autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">留言内容：</label>
+                            <div class="layui-input-block">
+                                <textarea name="content" placeholder="请输入内容" required class="layui-textarea"></textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn layui-bg-blue" lay-submit lay-filter="formDemo">立即提交</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </fieldset>
+            <fieldset class="layui-elem-field">
+                <legend>留言记录</legend>
+                <ul class="layui-timeline">
+                </ul>
+            </fieldset>
+        </div>
+    </div>
+
+    <!--表单end-->
+    <script src="layui.js"></script>
+    <script src="js/jquery-3.4.1.js"></script>
+    <script>
+        layui.use('element', function () {
+            var element = layui.element;
+        });
+        function toDate(num) {//时间戳转换为标准时间函数
+            var n = num * 1000;
+            var date = new Date(n);
+            var Y = date.getFullYear() + '年';
+            var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '月';
+            var D = date.getDate() < 10 ? '0' + date.getDate() : date.getDate() + '日';
+            var h = date.getHours() + ':';
+            var m = date.getMinutes() + ':';
+            var s = date.getSeconds();
+            return (Y + M + D + " " + h + m + s);
+        }
+        function showTalk(){
+            $.ajax({
+                url: "./show.php",
+                method: "get",
+                success: function (d) {
+                    var data = JSON.parse(d);
+                    console.log(data);
+                    var str = '';
+                    if (data.state === 1) {
+                        //查询成功
+                        for (var k in data.info) {
+                            // console.log(data.info[k].username);
+                            str += `<li class="layui-timeline-item">
+                    <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                    <div class="layui-timeline-content layui-text">
+                        <h3 class="layui-timeline-title">${data.info[k].username}:<span>${toDate(data.info[k].date)}</span></h3>
+                        <p>
+                            ${data.info[k].content}
+                        </p>
+                    </div>
+                </li>`;
+                        }
+                        $('.layui-timeline')[0].innerHTML = str;
+                    } else {
+                        //查询失败
+                        str += `<li class="layui-timeline-item">
+                    <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                    <div class="layui-timeline-content layui-text">
+                        <h3 class="layui-timeline-title"></h3>
+                        <p>
+                            无数据
+                        </p>
+                    </div>
+                </li>`;
+                        $('.layui-timeline')[0].innerHTML = str;
+                    }
+                }
+            });
+        }
+
+        showTalk();
+    </script>
+</body>
+
+</html>
